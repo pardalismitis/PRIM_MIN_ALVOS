@@ -61,8 +61,8 @@ extrai_componentes <- function(df_blocos) {
   # Etapa 1: Normalização textual
   # Corrige inconsistências estruturais antes de extrair componentes
   # ----------------------------------------------------------------
-    #mutate(
-     # texto = texto |>
+    mutate(
+      texto = texto |>
         # Corrige casos onde algo antes de ":" deveria ser Flora
         # Exemplo: "Alguma coisa: Flora;"
         # Reorganiza para "Flora: Alguma coisa;"
@@ -71,10 +71,10 @@ extrai_componentes <- function(df_blocos) {
         #"Flora: \\1;"
       #) |>
         # Remove trecho fixo redundante encontrado no texto bruto de Mata Atlântica
-       # str_replace_all(
-        #"Áreas das Formações Pioneiras Vegetação, , ",
-        #""
-      #) |>
+        str_replace_all(
+        "Rinorea villosiFlora",
+        "Rinorea villosiflora"
+      ) #|>
         # Remove ocorrência literal de "up mata"
         # alguma coisa intruziva em Mata Atlântica
        # str_replace_all(
@@ -102,7 +102,7 @@ extrai_componentes <- function(df_blocos) {
  #       "([A-Z][a-z]+)\\n\\s*([a-z])",
   #      "\\1 \\2"
    #   )
-  #  ) |>
+    ) |>
     # ----------------------------------------------------------------
   # Etapa 2: Extração dos blocos por componente
   # Cada str_extract captura o trecho entre um rótulo e o próximo
