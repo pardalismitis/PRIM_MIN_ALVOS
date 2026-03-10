@@ -2,7 +2,7 @@
 # Função: explode_alvos
 # Objetivo:
 #   Receber um dataframe já estruturado por UP e componentes
-#   (Fauna, Flora, Fitofisionomias, Patrimonio)
+#   (Fauna, Flora, Ambientes Singulares, Serviços Ecossistêmicos)
 #   e transformar o conteúdo textual em estrutura totalmente normalizada,
 #   com um ALVO por linha.
 #
@@ -43,7 +43,7 @@ explode_alvos <- function(df_componentes) {
   #   Nome da nova coluna que armazenará o conteúdo textual.
   #
   # Estrutura antes:
-  #   UP | Fauna | Flora | Fitofisionomias | Patrimonio
+  #   UP | Fauna | Flora | Ambientes | Servicos
   #
   # Estrutura depois:
   #   UP | COMPONENTE | ALVO
