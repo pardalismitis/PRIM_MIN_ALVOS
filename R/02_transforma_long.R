@@ -125,7 +125,16 @@ explode_alvos <- function(df_componentes) {
       #   "Panthera onca."
       #   "Panthera onca"
       ALVO = stringr::str_remove(ALVO, "\\.+$"),
-      # 3.5 — Remove ponto-e-vírgula residual no final
+      # 3.5 — Remove asteriscos no final
+      #
+      # "\\*+$"
+      #   um ou mais asteriscos no final da string
+      #
+      # Evita duplicata:
+      #   "Panthera onca*"
+      #   "Panthera onca"
+      ALVO = stringr::str_remove(ALVO, "\\*+$"),
+      # 3.6 — Remove ponto-e-vírgula residual no final
       #
       # ";+$"
       #   um ou mais ; no final

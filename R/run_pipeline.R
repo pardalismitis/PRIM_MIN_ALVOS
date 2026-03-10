@@ -22,7 +22,7 @@ rm(list = base::ls(all.names = TRUE))
 source("R/01_parse_alvos.R") # Contém parse_alvos_brutos()
 source("R/02_transforma_long.R") # Contém extrai_componentes() e explode_alvos()
 source("R/03_normalizacao.R") # Contém normaliza_alvos()
-source("R/04_pipeline_bacia.R")  # Contém processa_bioma()
+source("R/04_pipeline_bacia.R")  # Contém processa_bacia()
 # ------------------------------------------------------------------
 # CARREGAMENTO DE PACOTES
 #
@@ -41,16 +41,16 @@ library(tidyverse)
 #
 # list.files():
 #   - Procura dentro da pasta "data_raw"
-#   - pattern filtra apenas arquivos que começam com "IVT_"
+#   - pattern filtra apenas arquivos que começam com "MIN_"
 #     e terminam com ".csv"
 #   - full.names = TRUE retorna o caminho completo
 #
 # Exemplo capturado:
-#   data_raw/IVT_Amazonia.csv
-#   data_raw/IVT_Cerrado.csv
+#   data_raw/MIN_BH_3_4.csv
+#   data_raw/MIN_BH_4_5.csv
 #
 # Isso permite escalabilidade:
-#   novos biomas entram automaticamente no pipeline.
+#   novos bacias entram automaticamente no pipeline.
 # ------------------------------------------------------------------
 arquivos <- list.files(
   "data_raw",
@@ -58,7 +58,7 @@ arquivos <- list.files(
   full.names = TRUE
 )
 # ------------------------------------------------------------------
-# PROCESSAMENTO ITERATIVO DOS BIOMAS
+# PROCESSAMENTO ITERATIVO DOS BACIAS
 #
 # purrr::walk():
 #   Itera sobre cada elemento de 'arquivos'
@@ -69,37 +69,37 @@ purrr::walk(
   arquivos,
   function(caminho) {
     # --------------------------------------------------------------
-    # EXTRAÇÃO DO NOME DO BIOMA A PARTIR DO NOME DO ARQUIVO
+    # EXTRAÇÃO DO NOME DO BACIA A PARTIR DO NOME DO ARQUIVO
     #
     # basename() remove o caminho e mantém apenas o nome do arquivo.
     #
-    # stringr::str_remove("^IVT_")
-    #   remove prefixo "IVT_"
+    # stringr::str_remove("^MIN_")
+    #   remove prefixo "MIN_"
     #
     # stringr::str_remove("\\.csv$")
     #   remove extensão .csv no final
     #
     # Exemplo:
-    #   "data_raw/IVT_Amazonia.csv"
-    #   → "Amazonia"
+    #   "data_raw/MIN_BH_3_4.csv"
+    #   → "BH_3_4"
     # --------------------------------------------------------------
     bacia <- caminho |>
       basename() |>
       stringr::str_remove("^MIN_") |>
       stringr::str_remove("\\.csv$")
     # --------------------------------------------------------------
-    # EXECUÇÃO DO PIPELINE COMPLETO PARA O BIOMA
+    # EXECUÇÃO DO PIPELINE COMPLETO PARA A BACIA
     #
-    # processa_bioma executa:
+    # processa_bacia executa:
     #   1) Parsing
     #   2) Extração de componentes
     #   3) Explosão estrutural
     #   4) Normalização
-    #   5) Inclusão do identificador BIOMA
+    #   5) Inclusão do identificador BACIA
     #
     # caminho_correcoes:
     #   Aplica tabela padronizada de correções taxonômicas
-    #   compartilhada entre todos os biomas.
+    #   compartilhada entre todos os bacias.
     # --------------------------------------------------------------
     resultado <- processa_bacia(
       caminho_alvos = caminho,
@@ -110,11 +110,11 @@ purrr::walk(
     # ESCRITA DO RESULTADO EM DISCO
     #
     # Nome do arquivo segue padrão:
-    #   alvos_processados_<bioma>.csv
+    #   alvos_processados_<bacia>.csv
     #
     # glue::glue permite interpolação segura da string.
     #
-    # Cada bioma gera um arquivo independente em data_output.
+    # Cada bacia gera um arquivo independente em data_output.
     # --------------------------------------------------------------
     readr::write_csv(
       resultado,

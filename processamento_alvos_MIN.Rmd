@@ -27,7 +27,7 @@ O objetivo final é:
 
 3.  Identificar inconsistências.
 
-4.  Gerar listas únicas por bioma.
+4.  Gerar listas únicas por bacia.
 
 5.  Consolidar um banco único nacional.
 
@@ -169,12 +169,12 @@ alvos_ambientes_BH_5_6
 ### Serviços Ecossistêmicos
 
 ```{r}
-alvos_patrimonio_BH_5_6 <- BH_5_6 |>
-  filter(COMPONENTE == "Patrimonio") |>
+alvos_servicos_BH_5_6 <- BH_5_6 |>
+  filter(COMPONENTE == "Servicos") |>
   pull(ALVO) |>
   unique() |>
   sort()
-alvos_patrimonio_BH_5_6
+alvos_servicos_BH_5_6
 ```
 
 ## 4.3 Contagem de alvos únicos por componente
@@ -196,57 +196,7 @@ Aqui utilizamos `n_distinct()` para evitar supercontagem por repetição de UP.
 BH_7 <- read_csv("data_output/alvos_Processados_BH_7.csv")
 ```
 
-## 5.2 Identificação de gêneros isolados
-
-Em algumas situações, quando uma UP tinha muitos alvos houve um corte no final do pdf de origem deixando a lista incompleta e apenas com o gênero no último registro. Por isso foi necessário identificar após o processamento para não retirar classes de ambientes. Esses casos são inválidos para Fauna e Flora, pois representam perda do epíteto específico.
-
-Critério:
-
--   Palavra única
-
--   Primeira letra maiúscula
-
--   Restante minúsculo
-
-```{r}
-generos_isolados <- BH_7$ALVO[
-  grepl("^[A-Z][a-z-]+$", BH_7$ALVO)
-]
-
-generos_isolados <- sort(unique(generos_isolados))
-generos_isolados
-```
-
-## 5.3 Remoção condicional de gêneros isolados
-
-A remoção ocorre apenas quando:
-
--   COMPONENTE é Fauna OU Flora
-
--   ALVO corresponde ao padrão de gênero isolado
-
-```{r}
-BH_7 <- BH_7 %>%
-  mutate(
-    remover = COMPONENTE %in% c("Fauna", "Flora") &
-      grepl("^[A-Z][a-z-]+$", ALVO)
-  ) %>%
-  filter(!remover) %>%
-  select(-remover)
-```
-
-Checagem da limpeza
-
-```{r}
-generos_isolados <- BH_7$ALVO[
-  grepl("^[A-Z][a-z-]+$", BH_7$ALVO)
-]
-
-generos_isolados <- sort(unique(generos_isolados))
-generos_isolados
-```
-
-## 5.4 Extração de alvos por componente
+## 5.2 Extração de alvos por componente
 
 ### Fauna
 
@@ -286,15 +236,15 @@ alvos_ambientes_BH_7
 ### Serviços Ecossistêmicos
 
 ```{r}
-alvos_patrimonio_BH_7 <- BH_7 |>
-  filter(COMPONENTE == "Patrimonio") |>
+alvos_servicos_BH_7 <- BH_7 |>
+  filter(COMPONENTE == "Servicos") |>
   pull(ALVO) |>
   unique() |>
   sort()
-alvos_patrimonio_BH_7
+alvos_servicos_BH_7
 ```
 
-## 5.5 Contagem de alvos únicos por componente
+## 5.3 Contagem de alvos únicos por componente
 
 ```{r}
 BH_7 |>
@@ -305,142 +255,64 @@ BH_7 |>
 
 Aqui utilizamos `n_distinct()` para evitar supercontagem por repetição de UP.
 
-## 5.6 Salvar arquivo de saída
-
-```{r}
-write_csv(BH_7, "data_output/alvos_Processados_BH_7.csv")
-```
-
-
-# 6. Mata Atlântica
+# 6. BH_8
 
 ## 6.1 Leitura do arquivo processado
 
 ```{r, warning=FALSE, message=FALSE}
-mata_atlantica <- read_csv("data_output/alvos_Processados_Mata_Atlantica.csv")
+BH_8 <- read_csv("data_output/alvos_Processados_BH_8.csv")
 ```
 
-## 6.2 Identificação de gêneros isolados
-
-Em algumas situações, quando uma UP tinha muitos alvos houve um corte no final do pdf de origem deixando a lista incompleta e apenas com o gênero no último registro. Por isso foi necessário identificar após o processamento para não retirar classes de ambientes. Esses casos são inválidos para Fauna e Flora, pois representam perda do epíteto específico.
-
-Critério:
-
--   Palavra única
-
--   Primeira letra maiúscula
-
--   Restante minúsculo
-
-```{r}
-generos_isolados <- mata_atlantica$ALVO[
-  grepl("^[A-Z][a-z-]+$", mata_atlantica$ALVO)
-]
-
-generos_isolados <- sort(unique(generos_isolados))
-generos_isolados
-```
-
-## 6.3 Remoção condicional de gêneros isolados
-
-A remoção ocorre apenas quando:
-
--   COMPONENTE é Fauna OU Flora
-
--   ALVO corresponde ao padrão de gênero isolado
-
-```{r}
-mata_atlantica <- mata_atlantica %>%
-  mutate(
-    remover = COMPONENTE %in% c("Fauna", "Flora") &
-      grepl("^[A-Z][a-z-]+$", ALVO)
-  ) %>%
-  filter(!remover) %>%
-  select(-remover)
-```
-
-Checagem da limpeza
-
-```{r}
-generos_isolados <- mata_atlantica$ALVO[
-  grepl("^[A-Z][a-z-]+$", mata_atlantica$ALVO)
-]
-
-generos_isolados <- sort(unique(generos_isolados))
-generos_isolados
-```
-
-## 6.4 Correção de sufixos automáticos (.1, etc.)
-
-Primeiro remove sufixos numéricos no final:
-
-```{r}
-mata_atlantica <- mata_atlantica %>%
-  mutate(
-    ALVO = ALVO |>
-      str_replace("\\.[0-9]+$", "") |>
-      str_replace_all("\\.", "-")
-  )
-```
-
-Interpretação:
-
-`\\.` → ponto literal
-
-`[0-9]+` → um ou mais dígitos
-
-`$` → fim da string
-
-Remove apenas quando ocorre no final.
+## 6.2 Extração de alvos por componente
 
 ### Fauna
 
 ```{r}
-alvos_fauna_mata_atlantica <- mata_atlantica |>
+alvos_fauna_BH_8 <- BH_8 |>
   filter(COMPONENTE == "Fauna") |>
   pull(ALVO) |>
   unique() |>
   sort()
-alvos_fauna_mata_atlantica
+alvos_fauna_BH_8
 ```
 
 ### Flora
 
 ```{r}
-alvos_flora_mata_atlantica <- mata_atlantica |>
+alvos_flora_BH_8 <- BH_8 |>
   filter(COMPONENTE == "Flora") |>
   pull(ALVO) |>
   unique() |>
   sort()
-alvos_flora_mata_atlantica
+alvos_flora_BH_8
 ```
 
 ### Ambientes Singulares
 
 ```{r}
-alvos_ambientes_mata_atlantica <- mata_atlantica |>
+alvos_ambientes_BH_8 <- BH_8 |>
   filter(COMPONENTE == "Ambientes") |>
   pull(ALVO) |>
   unique() |>
   sort()
-alvos_ambientes_mata_atlantica
+alvos_ambientes_BH_8
 ```
 
 ### Serviços Ecossistêmicos
 
 ```{r}
-alvos_patrimonio_mata_atlantica <- mata_atlantica |>
-  filter(COMPONENTE == "Patrimonio") |>
+alvos_servicos_BH_8 <- BH_8 |>
+  filter(COMPONENTE == "Servicos") |>
   pull(ALVO) |>
   unique() |>
   sort()
-alvos_patrimonio_mata_atlantica
+alvos_servicos_BH_8
 ```
 
-## 6.5 Contagem de alvos únicos por componente
+## 6.3 Contagem de alvos únicos por componente
 
 ```{r}
-mata_atlantica |>
+BH_8 |>
   group_by(COMPONENTE) |>
   summarise(n_alvos_unicos = n_distinct(ALVO)) |>
   arrange(desc(n_alvos_unicos))
@@ -448,154 +320,16 @@ mata_atlantica |>
 
 Aqui utilizamos `n_distinct()` para evitar supercontagem por repetição de UP.
 
-## 6.6 Salvar arquivo de saída
+# 7. Consolidação dos Alvos - Nacional
 
-```{r}
-write_csv(mata_atlantica, "data_output/alvos_Processados_Mata_Atlantica.csv")
-```
-
-# 7. Pampa
-
-## 7.1 Leitura do arquivo processado
-
-```{r, warning=FALSE, message=FALSE}
-pampa <- read_csv("data_output/alvos_Processados_Pampa.csv")
-```
-
-## 7.2 Extração de alvos por componente
-
-### Fauna
-
-```{r}
-alvos_fauna_pampa <- pampa |>
-  filter(COMPONENTE == "Fauna") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_fauna_pampa
-```
-
-### Flora
-
-```{r}
-alvos_flora_pampa <- pampa |>
-  filter(COMPONENTE == "Flora") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_flora_pampa
-```
-
-### Ambientes Singulares
-
-```{r}
-alvos_ambientes_pampa <- pampa |>
-  filter(COMPONENTE == "Ambientes") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_ambientes_pampa
-```
-
-### Serviços Ecossistêmicos
-
-```{r}
-alvos_patrimonio_pampa <- pampa |>
-  filter(COMPONENTE == "Patrimonio") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_patrimonio_pampa
-```
-
-## 7.3 Contagem de alvos únicos por componente
-
-```{r}
-pampa |>
-  group_by(COMPONENTE) |>
-  summarise(n_alvos_unicos = n_distinct(ALVO)) |>
-  arrange(desc(n_alvos_unicos))
-```
-
-Aqui utilizamos `n_distinct()` para evitar supercontagem por repetição de UP.
-
-# 8. Pantanal
-
-## 8.1 Leitura do arquivo processado
-
-```{r, warning=FALSE, message=FALSE}
-pantanal <- read_csv("data_output/alvos_Processados_Pantanal.csv")
-```
-
-## 8.2 Extração de alvos por componente
-
-### Fauna
-
-```{r}
-alvos_fauna_pantanal <- pantanal |>
-  filter(COMPONENTE == "Fauna") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_fauna_pantanal
-```
-
-### Flora
-
-```{r}
-alvos_flora_pantanal <- pantanal |>
-  filter(COMPONENTE == "Flora") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_flora_pantanal
-```
-
-### Ambientes Singulares
-
-```{r}
-alvos_ambientes_pantanal <- pantanal |>
-  filter(COMPONENTE == "Ambientes") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_ambientes_pantanal
-```
-
-### Serviços Ecossistêmicos
-
-```{r}
-alvos_patrimonio_pantanal <- pantanal |>
-  filter(COMPONENTE == "Patrimonio") |>
-  pull(ALVO) |>
-  unique() |>
-  sort()
-alvos_patrimonio_pantanal
-```
-
-## 8.3 Contagem de alvos únicos por componente
-
-```{r}
-pantanal |>
-  group_by(COMPONENTE) |>
-  summarise(n_alvos_unicos = n_distinct(ALVO)) |>
-  arrange(desc(n_alvos_unicos))
-```
-
-Aqui utilizamos `n_distinct()` para evitar supercontagem por repetição de UP.
-
-# 9. Consolidação dos Alvos - Nacional
-
-## 9.1 União dos seis biomas
+## 7.1 União dos seis bacias
 
 ```{r}
 alvos <- bind_rows(
   BH_3_4 %>% select(ALVO, COMPONENTE),
   BH_5_6 %>% select(ALVO, COMPONENTE),
   BH_7 %>% select(ALVO, COMPONENTE),
-  mata_atlantica %>% select(ALVO, COMPONENTE),
-  pampa %>% select(ALVO, COMPONENTE),
-  pantanal %>% select(ALVO, COMPONENTE)
+  BH_8 %>% select(ALVO, COMPONENTE)
 ) %>%
   distinct()
 ```
@@ -604,15 +338,16 @@ Aqui a unicidade é definida por:
 
 (ALVO + COMPONENTE)
 
-Isso preserva eventuais inconsistências entre biomas.
+Isso preserva eventuais inconsistências entre bacias.
 
-## 9.2 Exportação
+
+## 7.2 Exportação
 
 ```{r}
-write_csv(alvos, "data_output/alvos_Processados_IVT.csv")
+write_csv(alvos, "data_output/alvos_Processados_MIN.csv")
 ```
 
-# 10. Detecção de possíveis erros de grafia
+# 8. Detecção de possíveis erros de grafia
 
 Utiliza-se distância de Levenshtein.
 

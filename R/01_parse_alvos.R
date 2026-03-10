@@ -118,12 +118,15 @@ extrai_componentes <- function(df_blocos) {
         str_replace_all(
           "axilliFlora",
           "axilliflora"
+        ) |>
+        str_replace_all(
+          " var ",
+          " var. "
+        ) |>
+        str_replace_all(
+          " subsp ",
+          " subsp. "
         ) #|>
-        #str_replace_all(
-#          "axilliFlora",
- #         "axilliflora"
-  #      ) |>
-        
         # Remove ocorrência literal de "up mata"
         # alguma coisa intruziva em Mata Atlântica
        # str_replace_all(
