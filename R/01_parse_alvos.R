@@ -26,7 +26,7 @@ parse_alvos_brutos <- function(caminho_arquivo) {
   # Expressão regular:
   # (\\b\\d+\\b)  -> captura um número inteiro isolado (UP)
   # \\s+          -> um ou mais espaços
-  # (.*?)         -> captura o texto associado de forma não gulosa
+  # (.*?)         -> captura o texto associado de forma direcionada
   # (?=...)       -> lookahead positivo: para a captura quando encontrar
   #                  outro número seguido de Fauna: ou fim do texto
   padrao <- "(\\b\\d+\\b)\\s+(.*?)(?=\\s+\\d+\\s+(Fauna:|$)|$)"
@@ -49,8 +49,8 @@ parse_alvos_brutos <- function(caminho_arquivo) {
 #   componentes internos:
 #     - Fauna
 #     - Flora
-#     - Fitofisionomias
-#     - Patrimônio Espeleológico
+#     - Ambientes Singulares
+#     - Serviços Ecossistêmicos
 # Retorno:
 #   Tibble com colunas adicionais correspondentes a cada componente
 # ------------------------------------------------------------------
@@ -63,14 +63,7 @@ extrai_componentes <- function(df_blocos) {
   # ----------------------------------------------------------------
     mutate(
       texto = texto |>
-        # Corrige casos onde algo antes de ":" deveria ser Flora
-        # Exemplo: "Alguma coisa: Flora;"
-        # Reorganiza para "Flora: Alguma coisa;"
-      #  str_replace_all(
-       # "([^;]+?)\\s*:\\s*Flora;",
-        #"Flora: \\1;"
-      #) |>
-        # Remove trecho fixo redundante encontrado no texto bruto de Mata Atlântica
+        # Correção de nomes com erro de grafia que prejudicam as funções
         str_replace_all(
         "Rinorea villosiFlora",
         "Rinorea villosiflora"
@@ -126,34 +119,15 @@ extrai_componentes <- function(df_blocos) {
         str_replace_all(
           " subsp ",
           " subsp. "
-        ) #|>
-        # Remove ocorrência literal de "up mata"
-        # alguma coisa intruziva em Mata Atlântica
-       # str_replace_all(
-      #  "up mata",
-       # ""
-    #  ) |>
-        # Corrige caso específico onde texto vinha colado após espécie
-        # Mano do céu, uma manhã tentando achar esse troço
-   #     str_replace_all(
-    #    "Xiphorhynchus atlanticus, Áreas das Formações Pioneiras Vegetação",
-     #   "Xiphorhynchus atlanticus"
-      #) |>
-        # Padroniza grafia de Patrimônio Espeleológico
-        # (?i) torna a regex case-insensitive
-        # tem grafias diferentes nos pdfs
-#        str_replace_all(
- #       "(?i)patrim[oô]nio\\s+espeleol[oó]gico:",
-  #      "Patrimônio Espeleológico:"
-   #   ) |>
+        ) |>
         # Junta quebras de linha indevidas entre palavras
         # Exemplo:
         # Genus
         # species  -> Genus species
-#        str_replace_all(
- #       "([A-Z][a-z]+)\\n\\s*([a-z])",
-  #      "\\1 \\2"
-   #   )
+        str_replace_all(
+        "([A-Z][a-z]+)\\n\\s*([a-z])",
+        "\\1 \\2"
+      )
     ) |>
     # ----------------------------------------------------------------
   # Etapa 2: Extração dos blocos por componente
